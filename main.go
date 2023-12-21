@@ -20,7 +20,7 @@ var file, _ = os.OpenFile("out.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 func main() {
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
 
-	go ListenForCircuit(30*time.Second, client)
+	go ListenForCircuit(10*time.Second, client) // For the first 10 seconds you're using your own IP address
 	slog.Info("connected to the tor network")
 
 	var discord Discord

@@ -17,9 +17,9 @@ Use a rotating Tor configuration
 
 Put this in a file named `torrc` on Windows at `%APPDATA%\tor\ `
 ```
-CircuitBuildTimeout 30
+CircuitBuildTimeout 10
 LearnCircuitBuildTimeout 0 
-MaxCircuitDirtiness 30
+MaxCircuitDirtiness 10
 ```
 This will assure a new circuit every 30 seconds
 
