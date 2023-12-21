@@ -20,6 +20,7 @@ Put this in a file named `torrc` on Windows at `%APPDATA%\tor\ `
 CircuitBuildTimeout 10
 LearnCircuitBuildTimeout 0
 MaxCircuitDirtiness 30
+ControlPort 9051
 ```
 This will assure a new circuit every 30 seconds
 
