@@ -50,7 +50,7 @@ func NewController(addr string) (*Controller, error) {
 }
 
 func (c *Controller) Signal(signal Signal) error {
-	_, _, err := c.makeRequest("SIGNAL" + signal.String())
+	_, _, err := c.makeRequest("SIGNAL " + signal.String())
 	if err != nil {
 		return err
 	}

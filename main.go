@@ -14,8 +14,6 @@ import (
 )
 
 var file, _ = os.OpenFile("out.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-var buffer = bytes.NewBuffer([]byte("{\"partnerUserId\":\"cb7f04df-8b8e-4dc8-bc20-2b0e60e211d9\"}"))
-var response Discord
 
 func main() {
 	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
@@ -25,11 +23,22 @@ func main() {
 
 	controller := StartController("127.0.0.1:9051")
 
-	Ticker(context.TODO(), 750*time.Millisecond, func() {
-		resp, err := client.Post(API, "application/json", buffer)
+	var response Discord
+
+	Ticker(context.TODO(), time.Nanosecond, func() {
+		resp, err := client.Post(API, "application/json", bytes.NewBuffer([]byte("{\"partnerUserId\":\"cb7f04df-8b8e-4dc8-bc20-2b0e60e211d9\"}")))
 		if err != nil {
 			slog.Error("could not make request to discord api", slog.String("error", err.Error()))
-			controller.Signal(NewCircuit)
+			return
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			slog.Error("discord api returned a non-200 status code", slog.String("status", resp.Status))
+			err = controller.Signal(NewCircuit)
+			if err != nil {
+				slog.Error("could not signal the tor controller", slog.String("error", err.Error()))
+				return
+			}
 			return
 		}
 
