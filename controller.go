@@ -5,6 +5,8 @@ import (
 	"net/textproto"
 	"strconv"
 	"strings"
+	"sync"
+	"time"
 )
 
 type Signal int
@@ -39,6 +41,11 @@ func (s Signal) String() string {
 
 type Controller struct {
 	*textproto.Conn
+
+	mu sync.Mutex
+
+	lastSignal     Signal
+	lastSignalTime time.Time
 }
 
 func NewController(addr string) (*Controller, error) {
@@ -46,35 +53,52 @@ func NewController(addr string) (*Controller, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Controller{conn}, nil
+	return &Controller{Conn: conn, lastSignal: -1}, nil
 }
 
 func (c *Controller) Signal(signal Signal) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if signal == c.lastSignal && time.Since(c.lastSignalTime) < 10*time.Second+500*time.Millisecond {
+		return nil // because this is a no-op
+	}
 	_, _, err := c.makeRequest("SIGNAL " + signal.String())
 	if err != nil {
 		return err
 	}
+	c.lastSignal = signal
+	c.lastSignalTime = time.Now()
 	return nil
 }
 
 func (c *Controller) GetAddress() (string, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	return c.getInfo("address")
 }
 
 func (c *Controller) GetBytesRead() (int, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	return c.getInfoInt("traffic/read")
 }
 
 func (c *Controller) GetBytesWritten() (int, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	return c.getInfoInt("traffic/written")
 }
 
 func (c *Controller) GetVersion() (string, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	return c.getInfo("version")
 }
 
 // AuthenticateNone authenticate to controller without password or cookie.
 func (c *Controller) AuthenticateNone() error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
 	_, _, err := c.makeRequest("AUTHENTICATE")
 	if err != nil {
 		return err
