@@ -24,9 +24,11 @@ func main() {
 	controller := StartController("127.0.0.1:9051")
 
 	var response Discord
+	var resp *http.Response
+	var err error
 
-	Ticker(context.TODO(), time.Nanosecond, func() {
-		resp, err := client.Post(API, "application/json", bytes.NewBuffer([]byte("{\"partnerUserId\":\"cb7f04df-8b8e-4dc8-bc20-2b0e60e211d9\"}")))
+	Ticker(context.TODO(), 500*time.Millisecond, func() {
+		resp, err = client.Post(API, "application/json", bytes.NewBuffer([]byte("{\"partnerUserId\":\"cb7f04df-8b8e-4dc8-bc20-2b0e60e211d9\"}")))
 		if err != nil {
 			slog.Error("could not make request to discord api", slog.String("error", err.Error()))
 			return

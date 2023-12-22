@@ -13,7 +13,7 @@ func Ticker(ctx context.Context, every time.Duration, f func()) {
 			return
 		default:
 			if time.Since(last) >= every {
-				f()
+				go f()
 				last = time.Now()
 			}
 		}
