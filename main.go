@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
 	"golang.org/x/net/proxy"
 	"log/slog"
 	"net"
@@ -28,7 +29,7 @@ func main() {
 	var err error
 
 	Ticker(context.TODO(), 500*time.Millisecond, func() {
-		resp, err = client.Post(API, "application/json", bytes.NewBuffer([]byte("{\"partnerUserId\":\"cb7f04df-8b8e-4dc8-bc20-2b0e60e211d9\"}")))
+		resp, err = client.Post(API, "application/json", bytes.NewBuffer([]byte("{\"partnerUserId\":\""+uuid.New().String()+"\"}")))
 		if err != nil {
 			slog.Error("could not make request to discord api", slog.String("error", err.Error()))
 			return
@@ -50,6 +51,7 @@ func main() {
 			return
 		}
 
+		resp.Body.Close()
 		slog.Info("discord api response", slog.String("token", response.Token))
 		file.Write([]byte(fmt.Sprintf(Template, response.Token)))
 	})
