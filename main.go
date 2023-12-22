@@ -28,7 +28,7 @@ func main() {
 	var resp *http.Response
 	var err error
 
-	Ticker(context.TODO(), 500*time.Millisecond, func() {
+	Ticker(context.TODO(), 10*time.Millisecond, func() {
 		resp, err = client.Post(API, "application/json", bytes.NewBuffer([]byte("{\"partnerUserId\":\""+uuid.New().String()+"\"}")))
 		if err != nil {
 			slog.Error("could not make request to discord api", slog.String("error", err.Error()))
@@ -51,7 +51,6 @@ func main() {
 			return
 		}
 
-		resp.Body.Close()
 		slog.Info("discord api response", slog.String("token", response.Token))
 		file.Write([]byte(fmt.Sprintf(Template, response.Token)))
 	})
