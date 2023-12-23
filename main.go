@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/Edouard127/controller"
 	"golang.org/x/net/proxy"
 	"log/slog"
 	"net"
@@ -21,7 +22,7 @@ func main() {
 	client := NewClient()
 	slog.Info("connected to the tor network")
 
-	controller := StartController("127.0.0.1:9051")
+	c := StartController("127.0.0.1:9051")
 
 	Ticker(context.TODO(), 5*time.Millisecond, func() {
 		resp, err := client.Post(API, "application/json", bytes.NewBuffer([]byte("{\"partnerUserId\":\""+UserID+"\"}")))
@@ -32,7 +33,7 @@ func main() {
 
 		if resp.StatusCode != http.StatusOK {
 			slog.Error("discord api returned a non-200 status code", slog.String("status", resp.Status))
-			err = controller.Signal(NewCircuit)
+			err = c.Signal(controller.NewCircuit)
 			if err != nil {
 				slog.Error("could not signal the tor controller", slog.String("error", err.Error()))
 				return
@@ -54,21 +55,21 @@ func main() {
 	file.Close()
 }
 
-func StartController(addr string) *Controller {
-	controller, err := NewController(addr)
+func StartController(addr string) *controller.Controller {
+	c, err := controller.NewController(addr)
 	if err != nil {
 		slog.Error("could not connect to the tor controller", slog.String("error", err.Error()))
 		return nil
 	}
 
-	err = controller.AuthenticateNone()
+	err = c.Authenticate("")
 	if err != nil {
 		slog.Error("could not authenticate with the tor controller", slog.String("error", err.Error()))
 		return nil
 	}
 
 	slog.Info("connected to the tor controller")
-	return controller
+	return c
 }
 
 func NewClient() *http.Client {
