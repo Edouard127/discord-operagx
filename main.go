@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/google/uuid"
 	"golang.org/x/net/proxy"
 	"log/slog"
 	"net"
@@ -24,12 +23,8 @@ func main() {
 
 	controller := StartController("127.0.0.1:9051")
 
-	var response Discord
-	var resp *http.Response
-	var err error
-
-	Ticker(context.TODO(), 10*time.Millisecond, func() {
-		resp, err = client.Post(API, "application/json", bytes.NewBuffer([]byte("{\"partnerUserId\":\""+uuid.New().String()+"\"}")))
+	Ticker(context.TODO(), 5*time.Millisecond, func() {
+		resp, err := client.Post(API, "application/json", bytes.NewBuffer([]byte("{\"partnerUserId\":\""+UserID+"\"}")))
 		if err != nil {
 			slog.Error("could not make request to discord api", slog.String("error", err.Error()))
 			return
@@ -45,6 +40,7 @@ func main() {
 			return
 		}
 
+		var response Discord
 		err = json.NewDecoder(resp.Body).Decode(&response)
 		if err != nil {
 			slog.Error("could not decode the discord api response", slog.String("error", err.Error()))
